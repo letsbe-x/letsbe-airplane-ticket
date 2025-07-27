@@ -9,12 +9,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultDiv = document.getElementById('result');
     const resultUrlInput = document.getElementById('result-url');
     const resultLink = document.getElementById('result-link');
-    
     const currentPassengersSpan = document.getElementById('current-passengers');
-    const totalPassengersInput = document.getElementById('total-passengers-input');
-    const validationMessage = document.querySelector('.validation-message');
+    const bulkAddContainer = document.getElementById('bulk-add-container');
+    const bulkAddToggleBtn = document.getElementById('bulk-add-toggle-btn');
+    const bulkAddTextarea = document.getElementById('bulk-add-textarea');
 
     let lastGeneratedUrl = '';
+    let isSyncing = false;
 
     const mapIconSvg = `<?xml version="1.0" encoding="UTF-8"?>
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="-300 -70 800 600">
@@ -120,38 +121,63 @@ document.addEventListener('DOMContentLoaded', () => {
     const getFlightDataWithSeats = () => {
         const commonData = {};
         document.getElementById('common-inputs').querySelectorAll('input').forEach(input => {
-            commonData[input.name] = input.value;
+            commonData[input.name] = input.value.trim();
         });
 
         const passengerInputs = Array.from(document.querySelectorAll('.passenger-card .passenger-name'));
-        const passengerNames = passengerInputs.map(input => input.value || 'PASSENGER').sort((a, b) => a.localeCompare(b));
-        
-        const totalForSeat = totalPassengersInput.value || passengerInputs.length;
-        const nameToSeatMap = new Map(passengerNames.map((name, index) => {
-            const seat = `${totalForSeat}${String.fromCharCode(65 + index)}`;
-            return [name, seat];
-        }));
+        const totalPassengers = passengerInputs.length;
 
-        return passengerInputs.map(input => {
-            const name = input.value || 'PASSENGER';
+        return passengerInputs.map((input, index) => {
+            const name = input.value.trim() || `PASSENGER ${index + 1}`;
+            const seat = `${totalPassengers}${String.fromCharCode(65 + index)}`;
             return {
                 flight: {
                     ...commonData,
                     ticket_holder: name,
-                    seat: nameToSeatMap.get(name) || '',
+                    seat: seat,
                 }
             };
         });
     };
 
-    const updateAllPreviews = () => {
+    const syncTextareaFromInputs = () => {
+        if (isSyncing) return;
+        isSyncing = true;
+        const names = Array.from(document.querySelectorAll('.passenger-card .passenger-name')).map(input => input.value);
+        bulkAddTextarea.value = names.join('\n');
+        isSyncing = false;
+    };
+
+    const syncInputsFromTextarea = () => {
+        if (isSyncing) return;
+        isSyncing = true;
+        const names = bulkAddTextarea.value.split(/[\n,]/).map(name => name.trim()).filter(name => name);
+        
+        if (names.length > 26) {
+            alert('탑승객은 최대 26명까지 추가할 수 있습니다.');
+            names.splice(26);
+            bulkAddTextarea.value = names.join('\n');
+        }
+
+        passengerList.innerHTML = '';
+        names.forEach(name => addPassenger(name, false));
+        updateAllPreviews(false);
+        isSyncing = false;
+    };
+
+    const updateAllPreviews = (syncTextarea = true) => {
         previewArea.innerHTML = '';
         
         const tickets = getFlightDataWithSeats();
         const currentPassengers = tickets.length;
 
         currentPassengersSpan.textContent = currentPassengers;
-        
+        addPassengerBtn.disabled = currentPassengers >= 26;
+
+        if (syncTextarea) {
+            syncTextareaFromInputs();
+        }
+
         if (currentPassengers === 0) {
             previewArea.innerHTML = '<p>탑승객을 추가하여 미리보기를 확인하세요.</p>';
             return;
@@ -187,61 +213,38 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    const syncPassengerList = () => {
-        const total = parseInt(totalPassengersInput.value, 10);
-        const current = document.querySelectorAll('.passenger-card').length;
-
-        if (total > 26) {
-            totalPassengersInput.classList.add('invalid');
-            validationMessage.classList.remove('hidden');
-            return;
-        } else {
-            totalPassengersInput.classList.remove('invalid');
-            validationMessage.classList.add('hidden');
-        }
-
-        if (total > current) {
-            for (let i = 0; i < total - current; i++) {
-                addPassenger(false); // Don't trigger update previews inside the loop
-            }
-        } else if (total < current) {
-            for (let i = 0; i < current - total; i++) {
-                passengerList.lastElementChild.remove();
-            }
-        }
-        updateAllPreviews();
-    };
-
-    const addPassenger = (sync = true) => {
+    const addPassenger = (name = '', triggerUpdate = true) => {
         const passengerCount = document.querySelectorAll('.passenger-card').length;
         if (passengerCount >= 26) {
-            addPassengerBtn.disabled = true;
-            return;
+            return false;
         }
 
         const cardNode = passengerTemplate.content.cloneNode(true);
         const passengerCard = cardNode.querySelector('.passenger-card');
+        passengerCard.querySelector('.passenger-name').value = name;
         
         passengerCard.querySelector('.remove-btn').addEventListener('click', () => {
             passengerCard.remove();
-            if (sync) {
-                totalPassengersInput.value = document.querySelectorAll('.passenger-card').length;
-            }
             updateAllPreviews();
         });
         
         passengerCard.querySelector('input').addEventListener('input', updateAllPreviews);
 
         passengerList.appendChild(cardNode);
-        if (sync) {
-            totalPassengersInput.value = passengerCount + 1;
+        
+        if (triggerUpdate) {
             updateAllPreviews();
         }
+        return true;
     };
 
+    addPassengerBtn.addEventListener('click', () => addPassenger());
+    bulkAddTextarea.addEventListener('input', syncInputsFromTextarea);
+    bulkAddToggleBtn.addEventListener('click', () => {
+        const isHidden = bulkAddContainer.classList.toggle('hidden');
+        bulkAddToggleBtn.textContent = isHidden ? '한번에 입력 펼치기' : '접기';
+    });
     document.getElementById('common-inputs').addEventListener('input', updateAllPreviews);
-    addPassengerBtn.addEventListener('click', () => addPassenger(true));
-    totalPassengersInput.addEventListener('input', syncPassengerList);
     
     form.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -290,5 +293,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    syncPassengerList(); // Initial sync
+    addPassenger('홍길동');
+    updateAllPreviews();
 });

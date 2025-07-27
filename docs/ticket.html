@@ -40,6 +40,7 @@
     </template>
 
     <!-- 찢기 효과를 위한 SVG 필터 -->
+    <audio id="tear-sound" src="tear.mp3" preload="auto"></audio>
     <svg style="display:none;">
         <defs>
             <filter id="tear-effect">
@@ -52,6 +53,7 @@
     <!-- 라이브러리 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
     
     <script src="js/ticket.js"></script>
 </body>

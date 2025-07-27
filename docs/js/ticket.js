@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ticketListContainer = document.getElementById('ticket-list-container');
     const ticketTemplate = document.getElementById('ticket-template');
     const downloadAllBtn = document.getElementById('download-all-btn');
+    const tearSound = document.getElementById('tear-sound'); // 오디오 요소 가져오기
 
     let ticketsData = [];
 
@@ -57,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="detail-item"><span class="label">FLIGHT</span><span class="value">${flight.flight_number} ${mapIconHTML}</span></div>
                     <div class="detail-item"><span class="label">SEAT</span><span class="value seat">${flight.seat}</span></div>
                     <div class="detail-item"><span class="label">DATE</span><span class="value">${departureDate}</span></div>
-                    <div class="detail-item"><span class="label">TIME</span><span class="value">${departureTime}</span></div>
+                    <div class="detail-item"><span class="label">DEPARTURE</span><span class="value">${departureTime}</span></div>
                     <div class="detail-item"><span class="label">CLASS</span><span class="value">FIRST</span></div>
                 </div>
             </div>
@@ -97,6 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
             isTorn = true;
             originalContainer.style.transform = 'rotateY(0deg) rotateX(0deg) scale(1)';
             originalContainer.classList.add('hidden');
+            tearSound.play().catch(e => console.warn("Sound playback failed")); // 소리 재생 추가
 
             const leftHalf = document.createElement('div');
             const rightHalf = document.createElement('div');

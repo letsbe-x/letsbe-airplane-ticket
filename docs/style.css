@@ -8,12 +8,7 @@ input[type="text"], input[type="datetime-local"], input[type="number"] { width: 
 input:focus { outline: none; border-color: #0056b3; box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1); }
 
 .passenger-info-header { display: flex; justify-content: space-between; align-items: center; }
-.passenger-count-control { position: relative; }
-.passenger-count-display { font-size: 1rem; font-weight: 400; color: #555; display: flex; align-items: center; gap: 5px; }
-#total-passengers-input { width: 70px; text-align: center; padding: 5px 8px; font-weight: 500; border-color: #ccc; }
-#total-passengers-input.invalid { border-color: #d90429; box-shadow: 0 0 0 3px rgba(217, 4, 41, 0.1); }
-.validation-message { color: #d90429; font-size: 0.8rem; position: absolute; right: 0; top: 100%; margin-top: 2px; }
-
+.passenger-count-display { font-size: 1rem; font-weight: 400; color: #555; }
 
 .passenger-card {
     display: flex;
@@ -32,6 +27,26 @@ input:focus { outline: none; border-color: #0056b3; box-shadow: 0 0 0 3px rgba(0
 }
 .passenger-inputs input { flex-grow: 1; }
 
+.passenger-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.bulk-add-area {
+    margin-top: 15px;
+}
+
+#bulk-add-textarea {
+    width: 100%;
+    height: 100px;
+    padding: 10px;
+    border: 1px solid #dbe2e9;
+    border-radius: 6px;
+    font-size: 1rem;
+    resize: vertical;
+}
+
 .btn-primary, .btn-secondary { padding: 12px 24px; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; transition: all 0.3s; }
 .btn-primary { background-color: #0033a0; color: white; }
 .btn-secondary { background-color: #e9ecef; color: #333; }
@@ -46,33 +61,27 @@ input:focus { outline: none; border-color: #0056b3; box-shadow: 0 0 0 3px rgba(0
     flex-wrap: wrap;
     gap: 20px;
     justify-content: center;
-    min-height: 100px; /* 내용 없을 때 최소 높이 */
+    min-height: 100px;
 }
 #preview-area p {
     color: #888;
 }
 
-/* --- 인터랙티브 미리보기 스타일 --- */
+/* --- 인터랙티브 미리보기 스타일 (공통) --- */
 .preview-wrapper {
-    flex-shrink: 0;
-    width: 550px;
-    height: 265px;
     position: relative;
     perspective: 1000px;
 }
 .ticket-original {
     width: 1100px; height: 530px;
-    transform: scale(0.5);
-    transform-origin: top left;
     transition: opacity 0.3s ease-out, transform 0.3s ease-out;
     cursor: grab;
 }
-.ticket-original.hidden { opacity: 0; transform: scale(0.475); pointer-events: none; }
+.ticket-original.hidden { opacity: 0; pointer-events: none; }
 .ticket-torn-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
 .ticket-half {
     position: absolute; width: 1100px; height: 530px;
     background-color: #fff; border-radius: 16px; opacity: 0;
-    transform: scale(0.5);
     transform-origin: top left;
 }
 .ticket-half.left { clip-path: polygon(0% 0%, 72% 0%, 72% 100%, 0% 100%); }
@@ -85,12 +94,19 @@ input:focus { outline: none; border-color: #0056b3; box-shadow: 0 0 0 3px rgba(0
     opacity: 0;
 }
 .ticket-half.animate { opacity: 1; animation-duration: 1.5s; animation-fill-mode: forwards; animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94); }
-.torn-edge.animate {
-    animation: fade-in-out 1.5s forwards;
-    animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+.torn-edge.animate { animation-name: fade-in-out 1.5s forwards; }
+
+/* --- index.html 전용 미리보기 스타일 --- */
+#preview-area .preview-wrapper {
+    width: 550px;
+    height: 265px;
 }
-.ticket-half.left.animate { animation-name: fall-left; }
-.ticket-half.right.animate { animation-name: fall-right; }
+#preview-area .ticket-original {
+    transform: scale(0.5);
+    transform-origin: top left;
+}
+#preview-area .ticket-original.hidden { transform: scale(0.475); }
+#preview-area .ticket-half { transform: scale(0.5); }
 @keyframes fall-left {
     0% { transform: scale(0.5) translate(0, 0) rotate(0); } 20% { transform: scale(0.5) translate(-30px, 10px) rotate(-3deg); }
     100% { transform: scale(0.5) translate(-150px, 400px) rotate(-15deg); opacity: 0; }
@@ -99,11 +115,37 @@ input:focus { outline: none; border-color: #0056b3; box-shadow: 0 0 0 3px rgba(0
     0% { transform: scale(0.5) translate(0, 0) rotate(0); } 20% { transform: scale(0.5) translate(30px, 10px) rotate(3deg); }
     100% { transform: scale(0.5) translate(150px, 400px) rotate(15deg); opacity: 0; }
 }
-@keyframes fade-in-out {
-    0% { opacity: 0; }
-    10% { opacity: 1; }
-    80% { opacity: 1; }
-    100% { opacity: 0; }
+
+/* --- ticket.html 전용 티켓 뷰어 스타일 --- */
+#ticket-list-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+}
+#ticket-list-container .passenger-card {
+    border: none;
+    padding: 0;
+    flex-direction: column;
+    align-items: center;
+}
+#ticket-list-container .preview-wrapper {
+    width: 1100px;
+    height: 530px;
+}
+#ticket-list-container .download-btn {
+    margin-top: 15px;
+}
+#ticket-list-container .ticket-original.hidden { transform: scale(0.95); }
+#ticket-list-container .ticket-half.left.animate { animation: fall-left-full 1.5s forwards; }
+#ticket-list-container .ticket-half.right.animate { animation: fall-right-full 1.5s forwards; }
+@keyframes fall-left-full {
+    0% { transform: translate(0, 0) rotate(0); } 20% { transform: translate(-60px, 20px) rotate(-3deg); }
+    100% { transform: translate(-300px, 800px) rotate(-15deg); opacity: 0; }
+}
+@keyframes fall-right-full {
+    0% { transform: translate(0, 0) rotate(0); } 20% { transform: translate(60px, 20px) rotate(3deg); }
+    100% { transform: translate(300px, 800px) rotate(15deg); opacity: 0; }
 }
 
 /* --- 티켓 공통 스타일 --- */
@@ -147,32 +189,9 @@ input:focus { outline: none; border-color: #0056b3; box-shadow: 0 0 0 3px rgba(0
     cursor: pointer;
 }
 
-/* --- 티켓 뷰어 스타일 --- */
-#ticket-list-container {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-}
-
 .action-buttons {
     margin-top: 30px;
     display: flex;
     gap: 15px;
     justify-content: center;
-}
-
-#ticket-list-container .passenger-card {
-    border: none;
-    padding: 0;
-}
-
-#ticket-list-container .preview-wrapper {
-    width: 1100px;
-    height: 530px;
-    transform: scale(1);
-}
-
-#ticket-list-container .download-btn {
-    margin-top: 15px;
-    align-self: center;
 }
