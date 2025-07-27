@@ -3,31 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Airline Ticket</title>
+    <title>새로운 항공권 그룹 만들기</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Open+Sans:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="ticket-wrapper">
-        <!-- 찢어지기 전의 원본 티켓 -->
-        <div id="ticket-original"></div>
+    <div class="main-container">
+        <form id="ticket-form">
+            <div class="form-section common-info">
+                <h2>1. 공통 여행 정보</h2>
+                <div class="grid-inputs" id="common-inputs">
+                    <input type="text" name="departure_city" placeholder="출발 도시" value="서울" required>
+                    <input type="text" name="arrival_city" placeholder="도착 도시" value="파리" required>
+                    <input type="text" name="airline" placeholder="항공사" value="Korean Air" required>
+                    <input type="text" name="flight_number" placeholder="항공편명" value="KE901" required>
+                    <input type="datetime-local" name="departure_datetime" value="2025-08-01T14:30" required>
+                </div>
+            </div>
 
-        <!-- 찢어진 후의 조각들을 담을 컨테이너 -->
-        <div id="ticket-torn-container"></div>
+            <div class="form-section passenger-info">
+                <h2>2. 탑승객 정보</h2>
+                <div id="passenger-list">
+                    <!-- 승객 정보 입력란이 여기에 동적으로 추가됩니다. -->
+                </div>
+                <button type="button" id="add-passenger-btn" class="btn-secondary">+ 인원 추가</button>
+            </div>
+
+            <div class="form-section submit-section">
+                <button type="submit" id="submit-btn" class="btn-primary">공유 링크 생성</button>
+                <div id="result" class="hidden">
+                    <p>✅ 링크가 생성되었습니다! 아래 주소를 공유하세요.</p>
+                    <input type="text" id="result-url" readonly>
+                </div>
+            </div>
+        </form>
     </div>
 
-    <!-- 오디오 파일 (직접 추가 필요) -->
-    <audio id="tear-sound" src="tear.mp3" preload="auto"></audio>
+    <!-- 동적 생성을 위한 템플릿 -->
+    <template id="passenger-template">
+        <div class="passenger-card">
+            <div class="passenger-inputs">
+                <input type="text" class="passenger-name" placeholder="이름 (예: 홍길동)" required>
+                <input type="text" class="passenger-seat" placeholder="좌석 (예: 24A)" required>
+                <button type="button" class="remove-btn" title="삭제">×</button>
+            </div>
+            <!-- ✨ 인터랙션을 위한 새로운 미리보기 컨테이너 구조 -->
+            <div class="preview-wrapper">
+                <div class="ticket-original"></div>
+                <div class="ticket-torn-container"></div>
+            </div>
+        </div>
+    </template>
 
-    <!-- 찢어진 가장자리 효과를 위한 SVG 필터 -->
+    <!-- ✨ 오디오 및 SVG 필터 복원 -->
+    <audio id="tear-sound" src="tear.mp3" preload="auto"></audio>
     <svg style="display:none;">
         <defs>
             <filter id="tear-effect">
-                <!-- 노이즈 생성 -->
                 <feTurbulence type="fractalNoise" baseFrequency="0.01 0.04" numOctaves="2" result="turbulence"/>
-                <!-- 노이즈를 변위 맵으로 사용 -->
                 <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="10" xChannelSelector="R" yChannelSelector="G"/>
             </filter>
         </defs>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- OG 태그는 서버에서 동적으로 채워집니다 -->
+    <title>My Tickets</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <svg id="tear-effect" style="display: none;">
+        <filter id="tear-filter">
+            <feTurbulence type="fractalNoise" baseFrequency="0.01 0.08" numOctaves="3" result="noise"/>
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="15" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+    </svg>
+    <div id="ticket-carousel-wrapper">
+        <div id="ticket-carousel">
+            <!-- 티켓들이 여기에 동적으로 삽입됩니다. -->
+        </div>
+    </div>
+    <div class="navigation" style="display: none;">
+        <button id="nav-up" class="nav-btn" title="이전 티켓">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>
+        </button>
+        <button id="nav-down" class="nav-btn" title="다음 티켓">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="/ticket-viewer.js"></script>
+</body>
+</html>
