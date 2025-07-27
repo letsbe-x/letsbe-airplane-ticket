@@ -13,15 +13,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return null;
         }
         try {
-            // 1. Base64를 디코딩하여 바이너리 문자열을 얻습니다.
             const binaryString = atob(data);
-            // 2. 바이너리 문자열을 Uint8Array로 변환합니다.
             const len = binaryString.length;
             const bytes = new Uint8Array(len);
             for (let i = 0; i < len; i++) {
                 bytes[i] = binaryString.charCodeAt(i);
             }
-            // 3. pako.inflate로 압축을 해제하고, 결과를 UTF-8 문자열로 파싱합니다.
             const decompressed = pako.inflate(bytes, { to: 'string' });
             const parsed = JSON.parse(decompressed);
             return parsed.tickets || [];
@@ -32,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const createTicketHTML = (ticketData) => {
+    const createTicketHTML = (ticketData, index) => {
         const { flight } = ticketData;
         const departure = new Date(flight.departure_datetime);
         const departureDate = `${departure.getFullYear()}.${String(departure.getMonth() + 1).padStart(2, '0')}.${String(departure.getDate()).padStart(2, '0')}`;
@@ -43,9 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="main-content">
                 <div class="header"><div class="airline-info"><span class="airline">${flight.airline}</span><span class="pass-title">BOARDING PASS</span></div></div>
                 <div class="flight-info">
-                    <div class="airport from"><div class="airport-name">${flight.departure_city}</div><div class="airport-code">${flight.departure_city.substring(0, 3).toUpperCase()}</div></div>
+                    <div class="airport from"><div class="airport-name">${flight.departure_city}</div><div class="airport-code">${flight.departure_airport_code || ''}</div></div>
                     <div class="plane-icon"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="#0033a0"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>
-                    <div class="airport to"><div class="airport-name">${flight.arrival_city}</div><div class="airport-code">${flight.arrival_city.substring(0, 3).toUpperCase()}</div></div>
+                    <div class="airport to"><div class="airport-name">${flight.arrival_city}</div><div class="airport-code">${flight.arrival_airport_code || ''}</div></div>
                 </div>
                 <div class="details-grid">
                     <div class="detail-item"><span class="label">PASSENGER</span><span class="value">${flight.ticket_holder}</span></div>
@@ -63,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
                      <div class="detail-item"><span class="label">FLIGHT</span><span class="value-small">${flight.flight_number}</span></div>
                      <div class="detail-item"><span class="label">SEAT</span><span class="value-small seat">${flight.seat}</span></div>
                 </div>
-                <div class="barcode"><svg class="barcode-svg"></svg></div>
+                <div class="barcode" id="qrcode-ticket-${index}"></div>
             </div>
         </div>`;
     };
@@ -143,17 +140,30 @@ document.addEventListener('DOMContentLoaded', () => {
         ticketsData = loadDataFromUrl();
         if (!ticketsData) return;
 
-        ticketsData.forEach(ticketData => {
+        ticketsData.forEach((ticketData, index) => {
             const cardNode = ticketTemplate.content.cloneNode(true);
             const passengerCard = cardNode.querySelector('.passenger-card');
             const originalContainer = passengerCard.querySelector('.ticket-original');
             const downloadBtn = passengerCard.querySelector('.download-btn');
 
-            originalContainer.innerHTML = createTicketHTML(ticketData);
+            originalContainer.innerHTML = createTicketHTML(ticketData, index);
             
-            const barcodeElement = originalContainer.querySelector('.barcode-svg');
-            JsBarcode(barcodeElement, `${ticketData.flight.flight_number}${ticketData.flight.seat}`, {
-                format: "CODE128", width: 2, height: 60, displayValue: false, background: 'transparent'
+            const qrcodeContainer = originalContainer.querySelector(`#qrcode-ticket-${index}`);
+            
+            const singleTicketPayload = { tickets: [ticketData] };
+            const jsonString = JSON.stringify(singleTicketPayload);
+            const compressed = pako.deflate(jsonString);
+            const binaryString = String.fromCharCode.apply(null, compressed);
+            const encoded = btoa(binaryString);
+            const qrUrl = `https://letsbe.site/letsbe-airplan-ticket/?data=${encoded}`;
+
+            new QRCode(qrcodeContainer, {
+                text: qrUrl,
+                width: 90,
+                height: 90,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
             });
 
             setupInteractiveTicket(passengerCard);

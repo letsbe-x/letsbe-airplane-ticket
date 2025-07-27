@@ -16,7 +16,9 @@
                 <h2>1. 공통 여행 정보</h2>
                 <div class="grid-inputs" id="common-inputs">
                     <input type="text" name="departure_city" placeholder="출발 도시" value="서울" required>
+                    <input type="text" name="departure_airport_code" placeholder="출발 공항 코드" value="ICN" required>
                     <input type="text" name="arrival_city" placeholder="도착 도시" value="파리" required>
+                    <input type="text" name="arrival_airport_code" placeholder="도착 공항 코드" value="CDG" required>
                     <input type="text" name="airline" placeholder="항공사" value="Korean Air" required>
                     <input type="text" name="flight_number" placeholder="항공편명" value="KE901" required>
                     <input type="datetime-local" name="departure_datetime" value="2025-08-01T14:30" required>
@@ -31,6 +33,13 @@
                 <button type="button" id="add-passenger-btn" class="btn-secondary">+ 인원 추가</button>
             </div>
 
+            <div class="form-section preview-section">
+                <h2>3. 미리보기</h2>
+                <div id="preview-area">
+                    <!-- 티켓 미리보기가 여기에 동적으로 추가됩니다. -->
+                </div>
+            </div>
+
             <div class="form-section submit-section">
                 <button type="submit" id="submit-btn" class="btn-primary">공유 링크 생성</button>
                 <div id="result" class="hidden">
@@ -43,7 +52,7 @@
         </form>
     </div>
 
-    <!-- 동적 생성을 위한 템플릿 -->
+    <!-- 탑승객 입력 템플릿 -->
     <template id="passenger-template">
         <div class="passenger-card">
             <div class="passenger-inputs">
@@ -51,10 +60,14 @@
                 <input type="text" class="passenger-seat" placeholder="좌석 (예: 24A)" required>
                 <button type="button" class="remove-btn" title="삭제">×</button>
             </div>
-            <div class="preview-wrapper">
-                <div class="ticket-original"></div>
-                <div class="ticket-torn-container"></div>
-            </div>
+        </div>
+    </template>
+
+    <!-- 미리보기 템플릿 -->
+    <template id="preview-template">
+         <div class="preview-wrapper">
+            <div class="ticket-original"></div>
+            <div class="ticket-torn-container"></div>
         </div>
     </template>
 
@@ -69,8 +82,9 @@
         </defs>
     </svg>
 
-    <!-- 압축 라이브러리 -->
+    <!-- 라이브러리 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

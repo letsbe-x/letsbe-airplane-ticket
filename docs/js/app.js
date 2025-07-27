@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const passengerList = document.getElementById('passenger-list');
     const addPassengerBtn = document.getElementById('add-passenger-btn');
     const passengerTemplate = document.getElementById('passenger-template');
+    const previewArea = document.getElementById('preview-area');
+    const previewTemplate = document.getElementById('preview-template');
     const tearSound = document.getElementById('tear-sound');
     const resultDiv = document.getElementById('result');
     const resultUrlInput = document.getElementById('result-url');
@@ -10,57 +12,57 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let lastGeneratedUrl = '';
 
-    const createTicketContentHTML = (data) => {
-        const { flight } = data;
+    const createTicketContentHTML = (flightData, index) => {
         return `
         <div class="ticket">
             <div class="main-content">
-                <div class="header"><div class="airline-info"><span class="airline">${flight.airline}</span><span class="pass-title">BOARDING PASS</span></div></div>
+                <div class="header"><div class="airline-info"><span class="airline">${flightData.airline || ''}</span><span class="pass-title">BOARDING PASS</span></div></div>
                 <div class="flight-info">
-                    <div class="airport from"><div class="airport-name">${flight.departure_city}</div><div class="airport-code">ICN</div></div>
-                    <div class="plane-icon"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-                    <div class="airport to"><div class="airport-name">${flight.arrival_city}</div><div class="airport-code">CDG</div></div>
+                    <div class="airport from"><div class="airport-name">${flightData.departure_city || ''}</div><div class="airport-code">${flightData.departure_airport_code || ''}</div></div>
+                    <div class="plane-icon"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="#0033a0"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>
+                    <div class="airport to"><div class="airport-name">${flightData.arrival_city || ''}</div><div class="airport-code">${flightData.arrival_airport_code || ''}</div></div>
                 </div>
                 <div class="details-grid">
-                    <div class="detail-item"><span class="label">PASSENGER</span><span class="value">${flight.ticket_holder || 'PASSENGER'}</span></div>
-                    <div class="detail-item"><span class="label">FLIGHT</span><span class="value">${flight.flight_number}</span></div>
-                    <div class="detail-item"><span class="label">SEAT</span><span class="value seat">${flight.seat || 'SEAT'}</span></div>
+                    <div class="detail-item"><span class="label">PASSENGER</span><span class="value">${flightData.ticket_holder || 'PASSENGER'}</span></div>
+                    <div class="detail-item"><span class="label">FLIGHT</span><span class="value">${flightData.flight_number || ''}</span></div>
+                    <div class="detail-item"><span class="label">SEAT</span><span class="value seat">${flightData.seat || 'SEAT'}</span></div>
                     <div class="detail-item"><span class="label">CLASS</span><span class="value">FIRST</span></div>
                 </div>
             </div>
             <div class="stub">
-                <div class="stub-header"><span class="pass-title-small">BOARDING PASS</span><span class="airline-small">${flight.airline}</span></div>
+                <div class="stub-header"><span class="pass-title-small">BOARDING PASS</span><span class="airline-small">${flightData.airline || ''}</span></div>
                 <div class="stub-details">
-                     <div class="detail-item"><span class="label">PASSENGER</span><span class="value-small">${flight.ticket_holder || 'PASSENGER'}</span></div>
-                     <div class="detail-item"><span class="label">FLIGHT</span><span class="value-small">${flight.flight_number}</span></div>
-                     <div class="detail-item"><span class="label">SEAT</span><span class="value-small seat">${flight.seat || 'SEAT'}</span></div>
+                     <div class="detail-item"><span class="label">PASSENGER</span><span class="value-small">${flightData.ticket_holder || 'PASSENGER'}</span></div>
+                     <div class="detail-item"><span class="label">FLIGHT</span><span class="value-small">${flightData.flight_number || ''}</span></div>
+                     <div class="detail-item"><span class="label">SEAT</span><span class="value-small seat">${flightData.seat || 'SEAT'}</span></div>
                 </div>
-                <div class="barcode"><img src="https://barcode.tec-it.com/barcode.ashx?data=${flight.flight_number}${flight.seat || ''}&code=Code128&dpi=96" alt="barcode"/></div>
+                <div class="barcode" id="qrcode-preview-${index}"></div>
             </div>
         </div>`;
     };
 
-    const setupInteractiveTicket = (passengerCard) => {
-        const originalContainer = passengerCard.querySelector('.ticket-original');
-        const tornContainer = passengerCard.querySelector('.ticket-torn-container');
+    const setupInteractiveTicket = (previewWrapper) => {
+        const originalContainer = previewWrapper.querySelector('.ticket-original');
+        const tornContainer = previewWrapper.querySelector('.ticket-torn-container');
         let isTorn = false;
 
-        const updatePreview = () => {
-            const commonInputs = document.getElementById('common-inputs');
-            const flightData = {};
-            commonInputs.querySelectorAll('input').forEach(input => {
-                flightData[input.name] = input.value;
-            });
-            flightData.ticket_holder = passengerCard.querySelector('.passenger-name').value;
-            flightData.seat = passengerCard.querySelector('.passenger-seat').value;
-            
-            originalContainer.innerHTML = createTicketContentHTML({ flight: flightData });
-            originalContainer.querySelector('.stub').addEventListener('click', handleTear);
-        };
+        originalContainer.addEventListener('mousemove', (e) => {
+            if (isTorn) return;
+            const rect = previewWrapper.getBoundingClientRect();
+            const x = (e.clientX - rect.left - rect.width / 2) / 20;
+            const y = (e.clientY - rect.top - rect.height / 2) / 20;
+            originalContainer.style.transform = `scale(0.5) rotateY(${x}deg) rotateX(${-y}deg) scale(1.05)`;
+        });
+
+        originalContainer.addEventListener('mouseleave', () => {
+            if (isTorn) return;
+            originalContainer.style.transform = 'scale(0.5) rotateY(0deg) rotateX(0deg) scale(1)';
+        });
 
         const handleTear = () => {
             if (isTorn) return;
             isTorn = true;
+            originalContainer.style.transform = 'scale(0.5) rotateY(0deg) rotateX(0deg) scale(1)';
             originalContainer.classList.add('hidden');
             tearSound.play().catch(e => console.warn("Sound playback failed"));
 
@@ -93,20 +95,76 @@ document.addEventListener('DOMContentLoaded', () => {
                 isTorn = false;
             }, 2000);
         };
+        
+        originalContainer.querySelector('.stub').addEventListener('click', handleTear);
+    };
 
-        passengerCard.querySelectorAll('input').forEach(input => input.addEventListener('input', updatePreview));
-        document.getElementById('common-inputs').addEventListener('input', updatePreview);
-        updatePreview();
+    const updateAllPreviews = () => {
+        previewArea.innerHTML = '';
+        
+        const commonData = {};
+        document.getElementById('common-inputs').querySelectorAll('input').forEach(input => {
+            commonData[input.name] = input.value;
+        });
+
+        const passengerCards = document.querySelectorAll('.passenger-card');
+        if (passengerCards.length === 0) {
+            previewArea.innerHTML = '<p>탑승객을 추가하여 미리보기를 확인하세요.</p>';
+            return;
+        }
+
+        passengerCards.forEach((card, index) => {
+            const flightData = { ...commonData };
+            flightData.ticket_holder = card.querySelector('.passenger-name').value;
+            flightData.seat = card.querySelector('.passenger-seat').value;
+
+            const previewNode = previewTemplate.content.cloneNode(true);
+            const previewWrapper = previewNode.querySelector('.preview-wrapper');
+            const originalContainer = previewWrapper.querySelector('.ticket-original');
+
+            originalContainer.innerHTML = createTicketContentHTML(flightData, index);
+            
+            const qrcodeContainer = originalContainer.querySelector(`#qrcode-preview-${index}`);
+            
+            const singleTicketPayload = { tickets: [{ flight: flightData }] };
+            const jsonString = JSON.stringify(singleTicketPayload);
+            const compressed = pako.deflate(jsonString);
+            const binaryString = String.fromCharCode.apply(null, compressed);
+            const encoded = btoa(binaryString);
+            const qrUrl = `https://letsbe.site/letsbe-airplan-ticket/?data=${encoded}`;
+
+            new QRCode(qrcodeContainer, {
+                text: qrUrl,
+                width: 90,
+                height: 90,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+
+            setupInteractiveTicket(previewWrapper);
+            previewArea.appendChild(previewNode);
+        });
     };
 
     const addPassenger = () => {
-        const card = passengerTemplate.content.cloneNode(true);
-        const passengerCard = card.querySelector('.passenger-card');
-        passengerList.appendChild(passengerCard);
-        passengerCard.querySelector('.remove-btn').addEventListener('click', () => passengerCard.remove());
-        setupInteractiveTicket(passengerCard);
+        const cardNode = passengerTemplate.content.cloneNode(true);
+        const passengerCard = cardNode.querySelector('.passenger-card');
+        
+        passengerCard.querySelector('.remove-btn').addEventListener('click', () => {
+            passengerCard.remove();
+            updateAllPreviews();
+        });
+        
+        passengerCard.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', updateAllPreviews);
+        });
+
+        passengerList.appendChild(cardNode);
+        updateAllPreviews();
     };
 
+    document.getElementById('common-inputs').addEventListener('input', updateAllPreviews);
     addPassengerBtn.addEventListener('click', addPassenger);
     
     form.addEventListener('submit', (e) => {
@@ -138,11 +196,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const jsonString = JSON.stringify({ tickets });
-            // 1. pako.deflate로 압축하여 Uint8Array를 얻습니다.
             const compressed = pako.deflate(jsonString);
-            // 2. Uint8Array를 btoa가 처리할 수 있는 바이너리 문자열로 변환합니다.
             const binaryString = String.fromCharCode.apply(null, compressed);
-            // 3. Base64로 인코딩합니다.
             const encoded = btoa(binaryString);
             
             const url = new URL('ticket.html', window.location.href);
