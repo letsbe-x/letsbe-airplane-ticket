@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ticketListContainer = document.getElementById('ticket-list-container');
     const ticketTemplate = document.getElementById('ticket-template');
     const downloadAllBtn = document.getElementById('download-all-btn');
-    const tearSound = document.getElementById('tear-sound'); // 오디오 요소 가져오기
+    const tearSound = document.getElementById('tear-sound');
 
     let ticketsData = [];
 
@@ -98,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
             isTorn = true;
             originalContainer.style.transform = 'rotateY(0deg) rotateX(0deg) scale(1)';
             originalContainer.classList.add('hidden');
-            tearSound.play().catch(e => console.warn("Sound playback failed")); // 소리 재생 추가
+            tearSound.play().catch(e => console.warn("Sound playback failed"));
 
             const leftHalf = document.createElement('div');
             const rightHalf = document.createElement('div');
@@ -146,6 +146,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const applyScaling = () => {
+        const containerWidth = ticketListContainer.offsetWidth;
+        const tickets = ticketListContainer.querySelectorAll('.passenger-card');
+        tickets.forEach(ticket => {
+            if (containerWidth < 1100) {
+                const scale = containerWidth / 1100;
+                ticket.style.transform = `scale(${scale})`;
+                ticket.style.marginBottom = `-${530 * (1 - scale)}px`;
+            } else {
+                ticket.style.transform = 'scale(1)';
+                ticket.style.marginBottom = '0';
+            }
+        });
+    };
+
     const init = () => {
         ticketsData = loadDataFromUrl();
         if (!ticketsData) return;
@@ -188,6 +203,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (ticketsData.length === 0) {
             downloadAllBtn.style.display = 'none';
         }
+        
+        applyScaling();
     };
 
     downloadAllBtn.addEventListener('click', async () => {
@@ -209,5 +226,6 @@ document.addEventListener('DOMContentLoaded', () => {
         downloadAllBtn.textContent = '모든 티켓 이미지로 저장';
     });
 
+    window.addEventListener('resize', applyScaling);
     init();
 });
