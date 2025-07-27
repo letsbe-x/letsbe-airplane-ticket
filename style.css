@@ -1,0 +1,163 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Roboto', 'Open Sans', sans-serif;
+    background-color: #e0e5ec;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+#ticket-wrapper {
+    width: 1100px;
+    height: 530px;
+    position: relative;
+    perspective: 2000px;
+}
+
+/* --- 원본 티켓 스타일 --- */
+#ticket-original {
+    width: 100%;
+    height: 100%;
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+}
+
+#ticket-original.hidden {
+    opacity: 0;
+    transform: scale(0.95);
+    pointer-events: none;
+}
+
+.ticket {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    border-radius: 16px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+/* --- 찢어진 조각들 스타일 --- */
+#ticket-torn-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* 평소에는 클릭 안되게 */
+}
+
+.ticket-half {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: #fff;
+    border-radius: 16px;
+    opacity: 0;
+    transform-style: preserve-3d;
+}
+
+.ticket-half.left {
+    clip-path: polygon(0% 0%, 72% 0%, 72% 100%, 0% 100%);
+}
+
+.ticket-half.right {
+    clip-path: polygon(72% 0%, 100% 0%, 100% 100%, 72% 100%);
+}
+
+/* 찢어진 가장자리 효과 */
+.torn-edge {
+    position: absolute;
+    top: 0;
+    left: 72%; /* 절취선 위치 */
+    width: 30px; /* 필터 효과 너비 */
+    height: 100%;
+    transform: translateX(-50%);
+    background-color: #fff;
+    filter: url(#tear-effect);
+}
+
+/* 애니메이션 */
+.ticket-half.animate {
+    opacity: 1;
+    animation-duration: 1.5s;
+    animation-fill-mode: forwards;
+    animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.ticket-half.left.animate {
+    animation-name: fall-left;
+}
+
+.ticket-half.right.animate {
+    animation-name: fall-right;
+}
+
+@keyframes fall-left {
+    0% { transform: translate(0, 0) rotate(0); }
+    20% { transform: translate(-30px, 10px) rotate(-3deg); }
+    100% { transform: translate(-150px, 800px) rotate(-15deg); opacity: 0; }
+}
+
+@keyframes fall-right {
+    0% { transform: translate(0, 0) rotate(0); }
+    20% { transform: translate(30px, 10px) rotate(3deg); }
+    100% { transform: translate(150px, 800px) rotate(15deg); opacity: 0; }
+}
+
+
+/* --- 티켓 내부 콘텐츠 스타일 (기존과 유사) --- */
+.main-content {
+    flex-grow: 1; padding: 40px; display: flex; flex-direction: column;
+}
+.stub {
+    width: 320px; flex-shrink: 0; padding: 40px 30px; display: flex; flex-direction: column; position: relative; cursor: pointer;
+}
+.stub::before {
+    content: ''; position: absolute; top: 0; left: -1px; height: 100%; width: 2px;
+    background-image: radial-gradient(circle at center, #dbe2e9 1px, transparent 1.5px);
+    background-size: 2px 10px; background-repeat: repeat-y;
+}
+.header {
+    background-color: #0033a0; color: #fff; padding: 10px 20px; border-radius: 8px; margin-bottom: 30px;
+}
+.airline-info {
+    display: flex; justify-content: space-between; align-items: baseline;
+}
+.airline {
+    font-family: 'Open Sans', sans-serif; font-size: 2rem; font-weight: 700;
+}
+.pass-title {
+    font-size: 1.1rem; font-weight: 500; letter-spacing: 1px;
+}
+.flight-info {
+    display: flex; justify-content: space-between; align-items: center; margin-bottom: 35px;
+}
+.airport { text-align: center; }
+.airport.from { text-align: left; }
+.airport.to { text-align: right; }
+.airport-name { font-size: 2rem; font-weight: 500; color: #444; }
+.airport-code { font-family: 'Open Sans', sans-serif; font-size: 5rem; font-weight: 700; color: #0033a0; line-height: 1; }
+.plane-icon { margin: 0 20px; }
+.details-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px 25px; margin-top: auto; }
+.detail-item { display: flex; flex-direction: column; }
+.label { font-size: 0.8rem; color: #888; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px; }
+.value { font-size: 1.2rem; font-weight: 700; }
+.value.seat { font-size: 1.5rem; color: #d90429; }
+.stub-header { text-align: right; margin-bottom: 30px; }
+.pass-title-small { font-size: 1rem; color: #555; }
+.airline-small { font-size: 1.5rem; font-weight: 700; color: #0033a0; }
+.stub-details { display: flex; flex-direction: column; gap: 16px; }
+.stub-details .label { font-size: 0.8rem; }
+.stub-details .value-small { font-size: 1.1rem; font-weight: 700; }
+.stub-details .value-small.seat { font-size: 1.3rem; color: #d90429; }
+.barcode { margin-top: auto; padding-top: 20px; text-align: center; }
+.stub-footer { margin-top: 20px; text-align: center; font-size: 0.8rem; color: #888; font-weight: 500; }

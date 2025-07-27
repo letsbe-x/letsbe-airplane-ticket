@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "express": "^5.1.0",
+    "node-html-to-image": "^5.0.0"
+  }
+}

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Airline Ticket</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Open+Sans:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="ticket-wrapper">
+        <!-- 찢어지기 전의 원본 티켓 -->
+        <div id="ticket-original"></div>
+
+        <!-- 찢어진 후의 조각들을 담을 컨테이너 -->
+        <div id="ticket-torn-container"></div>
+    </div>
+
+    <!-- 오디오 파일 (직접 추가 필요) -->
+    <audio id="tear-sound" src="tear.mp3" preload="auto"></audio>
+
+    <!-- 찢어진 가장자리 효과를 위한 SVG 필터 -->
+    <svg style="display:none;">
+        <defs>
+            <filter id="tear-effect">
+                <!-- 노이즈 생성 -->
+                <feTurbulence type="fractalNoise" baseFrequency="0.01 0.04" numOctaves="2" result="turbulence"/>
+                <!-- 노이즈를 변위 맵으로 사용 -->
+                <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="10" xChannelSelector="R" yChannelSelector="G"/>
+            </filter>
+        </defs>
+    </svg>
+
+    <script src="main.js"></script>
+</body>
+</html>
