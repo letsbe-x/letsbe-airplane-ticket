@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const compressed = pako.deflate(jsonString);
             const binaryString = String.fromCharCode.apply(null, compressed);
             const encoded = btoa(binaryString);
-            const qrUrl = `https://letsbe.site/letsbe-airplan-ticket/?data=${encoded}`;
+            const qrUrl = `https://letsbe.github.io/letsbe-airplan-ticket/?data=${encoded}`;
 
             new QRCode(qrcodeContainer, {
                 text: qrUrl,
