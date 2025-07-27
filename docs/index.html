@@ -34,8 +34,10 @@
             <div class="form-section submit-section">
                 <button type="submit" id="submit-btn" class="btn-primary">공유 링크 생성</button>
                 <div id="result" class="hidden">
-                    <p>✅ 링크가 생성되었습니다! 아래 주소를 공유하세요.</p>
-                    <input type="text" id="result-url" readonly>
+                    <p>✅ 링크가 생성되었습니다! 아래 주소를 공유하거나 클릭하여 확인하세요.</p>
+                    <a href="#" id="result-link" target="_blank">
+                        <input type="text" id="result-url" readonly>
+                    </a>
                 </div>
             </div>
         </form>
@@ -49,7 +51,6 @@
                 <input type="text" class="passenger-seat" placeholder="좌석 (예: 24A)" required>
                 <button type="button" class="remove-btn" title="삭제">×</button>
             </div>
-            <!-- ✨ 인터랙션을 위한 새로운 미리보기 컨테이너 구조 -->
             <div class="preview-wrapper">
                 <div class="ticket-original"></div>
                 <div class="ticket-torn-container"></div>
@@ -57,7 +58,7 @@
         </div>
     </template>
 
-    <!-- ✨ 오디오 및 SVG 필터 복원 -->
+    <!-- 오디오 및 SVG 필터 -->
     <audio id="tear-sound" src="tear.mp3" preload="auto"></audio>
     <svg style="display:none;">
         <defs>
@@ -68,6 +69,8 @@
         </defs>
     </svg>
 
-    <script src="main.js"></script>
+    <!-- 압축 라이브러리 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>

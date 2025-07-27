@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>티켓 확인</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Open+Sans:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="main-container">
+        <h1>발급된 항공권</h1>
+        <p>생성된 항공권을 확인하고 이미지로 저장하세요. 티켓의 오른쪽 부분을 클릭하면 찢어집니다.</p>
+        
+        <div id="ticket-list-container">
+            <!-- 티켓 목록이 여기에 동적으로 삽입됩니다. -->
+        </div>
+
+        <div class="action-buttons">
+            <button id="download-all-btn" class="btn-primary">모든 티켓 이미지로 저장</button>
+            <a href="index.html" class="btn-secondary">새로운 티켓 만들기</a>
+        </div>
+    </div>
+
+    <!-- 티켓 템플릿 -->
+    <template id="ticket-template">
+        <div class="passenger-card">
+            <div class="preview-wrapper">
+                <div class="ticket-original">
+                    <!-- JS로 내용 채움 -->
+                </div>
+                <div class="ticket-torn-container">
+                    <!-- 찢어진 조각들이 여기에 들어감 -->
+                </div>
+            </div>
+            <button class="download-btn btn-secondary">이 티켓만 저장</button>
+        </div>
+    </template>
+
+    <!-- 찢기 효과를 위한 SVG 필터 -->
+    <svg style="display:none;">
+        <defs>
+            <filter id="tear-effect">
+                <feTurbulence type="fractalNoise" baseFrequency="0.01 0.04" numOctaves="2" result="turbulence"/>
+                <feDisplacementMap in="SourceGraphic" in2="turbulence" scale="10" xChannelSelector="R" yChannelSelector="G"/>
+            </filter>
+        </defs>
+    </svg>
+    
+    <!-- 라이브러리 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+    
+    <script src="js/ticket.js"></script>
+</body>
+</html>

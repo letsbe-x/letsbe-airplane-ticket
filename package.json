@@ -1,8 +1,0 @@
-{
-  "dependencies": {
-    "express": "^5.1.0",
-    "lowdb": "^7.0.1",
-    "nanoid": "^5.1.5",
-    "node-html-to-image": "^5.0.0"
-  }
-}

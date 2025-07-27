@@ -4,8 +4,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const addPassengerBtn = document.getElementById('add-passenger-btn');
     const passengerTemplate = document.getElementById('passenger-template');
     const tearSound = document.getElementById('tear-sound');
+    const resultDiv = document.getElementById('result');
+    const resultUrlInput = document.getElementById('result-url');
+    const resultLink = document.getElementById('result-link');
 
-    // 티켓 콘텐츠 HTML 생성
+    let lastGeneratedUrl = '';
+
     const createTicketContentHTML = (data) => {
         const { flight } = data;
         return `
@@ -36,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>`;
     };
 
-    // 각 승객 카드에 대한 인터랙션 설정
     const setupInteractiveTicket = (passengerCard) => {
         const originalContainer = passengerCard.querySelector('.ticket-original');
         const tornContainer = passengerCard.querySelector('.ticket-torn-container');
@@ -58,9 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const handleTear = () => {
             if (isTorn) return;
             isTorn = true;
-
             originalContainer.classList.add('hidden');
-            tearSound.play().catch(e => console.warn("사운드 재생 실패"));
+            tearSound.play().catch(e => console.warn("Sound playback failed"));
 
             const leftHalf = document.createElement('div');
             const rightHalf = document.createElement('div');
@@ -76,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
             leftHalf.appendChild(tearEdge.cloneNode());
             rightHalf.appendChild(tearEdge.cloneNode());
 
-            tornContainer.innerHTML = ''; // 이전 조각들 제거
+            tornContainer.innerHTML = '';
             tornContainer.appendChild(leftHalf);
             tornContainer.appendChild(rightHalf);
 
@@ -92,18 +94,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 2000);
         };
 
-        // 입력 필드에 이벤트 리스너 연결
-        passengerCard.querySelectorAll('input').forEach(input => {
-            input.addEventListener('input', updatePreview);
-        });
-        // 공통 정보 변경 시에도 업데이트
+        passengerCard.querySelectorAll('input').forEach(input => input.addEventListener('input', updatePreview));
         document.getElementById('common-inputs').addEventListener('input', updatePreview);
-
-        // 초기 렌더링
         updatePreview();
     };
 
-    // 새 승객 추가
     const addPassenger = () => {
         const card = passengerTemplate.content.cloneNode(true);
         const passengerCard = card.querySelector('.passenger-card');
@@ -114,64 +109,61 @@ document.addEventListener('DOMContentLoaded', () => {
 
     addPassengerBtn.addEventListener('click', addPassenger);
     
-    // 폼 제출 로직 (서버 연동)
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener('submit', (e) => {
         e.preventDefault();
         const submitBtn = document.getElementById('submit-btn');
-        const resultDiv = document.getElementById('result');
-        const resultUrlInput = document.getElementById('result-url');
-
+        
         submitBtn.disabled = true;
         submitBtn.textContent = '생성 중...';
 
-        // 1. 공통 정보 수집
         const commonData = {};
         document.getElementById('common-inputs').querySelectorAll('input').forEach(input => {
-            if (input.type === 'datetime-local') {
-                commonData[input.name] = new Date(input.value).toISOString();
-            } else {
-                commonData[input.name] = input.value;
+            commonData[input.name] = input.type === 'datetime-local' ? new Date(input.value).toISOString() : input.value;
+        });
+
+        const tickets = Array.from(document.querySelectorAll('.passenger-card')).map(card => ({
+            flight: {
+                ...commonData,
+                ticket_holder: card.querySelector('.passenger-name').value,
+                seat: card.querySelector('.passenger-seat').value,
             }
-        });
+        }));
 
-        // 2. 각 승객 정보와 공통 정보를 합쳐 최종 데이터 생성
-        const ticketsPayload = Array.from(document.querySelectorAll('.passenger-card')).map(card => {
-            const flight = { ...commonData };
-            flight.ticket_holder = card.querySelector('.passenger-name').value;
-            flight.seat = card.querySelector('.passenger-seat').value;
-            return { flight };
-        });
-
-        if (ticketsPayload.length === 0) {
+        if (tickets.length === 0) {
             alert('적어도 한 명의 탑승객을 추가해야 합니다.');
             submitBtn.disabled = false;
             submitBtn.textContent = '공유 링크 생성';
             return;
         }
 
-        // 3. 서버로 데이터 전송
         try {
-            const response = await fetch('/api/tickets', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(ticketsPayload)
-            });
-            const data = await response.json();
+            const jsonString = JSON.stringify({ tickets });
+            // 1. pako.deflate로 압축하여 Uint8Array를 얻습니다.
+            const compressed = pako.deflate(jsonString);
+            // 2. Uint8Array를 btoa가 처리할 수 있는 바이너리 문자열로 변환합니다.
+            const binaryString = String.fromCharCode.apply(null, compressed);
+            // 3. Base64로 인코딩합니다.
+            const encoded = btoa(binaryString);
+            
+            const url = new URL('ticket.html', window.location.href);
+            url.searchParams.set('data', encoded);
+            const finalUrl = url.href;
 
-            if (response.ok) {
-                resultUrlInput.value = `${window.location.origin}${data.url}`;
+            if (finalUrl === lastGeneratedUrl) {
                 resultDiv.classList.remove('hidden');
             } else {
-                throw new Error(data.message || '알 수 없는 오류가 발생했습니다.');
+                lastGeneratedUrl = finalUrl;
+                resultUrlInput.value = finalUrl;
+                resultLink.href = finalUrl;
+                resultDiv.classList.remove('hidden');
             }
         } catch (error) {
-            alert(`오류: ${error.message}`);
+            alert(`오류가 발생했습니다: ${error.message}`);
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = '공유 링크 생성';
         }
     });
 
-    // 초기 승객 1명 추가
     addPassenger();
 });
