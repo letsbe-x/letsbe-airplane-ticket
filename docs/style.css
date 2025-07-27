@@ -4,8 +4,16 @@ body { font-family: 'Roboto', 'Open Sans', sans-serif; background-color: #f4f7f9
 .form-section { background: #fff; border-radius: 12px; padding: 30px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
 h2 { font-size: 1.5rem; margin-bottom: 20px; border-bottom: 1px solid #eef2f7; padding-bottom: 15px; }
 .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-input[type="text"], input[type="datetime-local"] { width: 100%; padding: 12px; border: 1px solid #dbe2e9; border-radius: 6px; font-size: 1rem; transition: border-color 0.3s, box-shadow 0.3s; }
+input[type="text"], input[type="datetime-local"], input[type="number"] { width: 100%; padding: 12px; border: 1px solid #dbe2e9; border-radius: 6px; font-size: 1rem; transition: border-color 0.3s, box-shadow 0.3s; }
 input:focus { outline: none; border-color: #0056b3; box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1); }
+
+.passenger-info-header { display: flex; justify-content: space-between; align-items: center; }
+.passenger-count-control { position: relative; }
+.passenger-count-display { font-size: 1rem; font-weight: 400; color: #555; display: flex; align-items: center; gap: 5px; }
+#total-passengers-input { width: 70px; text-align: center; padding: 5px 8px; font-weight: 500; border-color: #ccc; }
+#total-passengers-input.invalid { border-color: #d90429; box-shadow: 0 0 0 3px rgba(217, 4, 41, 0.1); }
+.validation-message { color: #d90429; font-size: 0.8rem; position: absolute; right: 0; top: 100%; margin-top: 2px; }
+
 
 .passenger-card {
     display: flex;
@@ -116,26 +124,27 @@ input:focus { outline: none; border-color: #0056b3; box-shadow: 0 0 0 3px rgba(0
 .ticket .airport-name { font-size: 2rem; font-weight: 500; color: #444; }
 .ticket .airport-code { font-family: 'Open Sans', sans-serif; font-size: 5rem; font-weight: 700; color: #0033a0; line-height: 1; }
 .ticket .plane-icon { margin: 0 20px; }
-.ticket .details-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px 25px; margin-top: auto; }
+.ticket .details-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px 25px; margin-top: auto; }
 .ticket .detail-item { display: flex; flex-direction: column; }
 .ticket .label { font-size: 0.8rem; color: #888; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px; }
-.ticket .value { font-size: 1.2rem; font-weight: 700; }
+.ticket .value { font-size: 1.2rem; font-weight: 700; display: flex; align-items: center; }
 .ticket .value.seat { font-size: 1.5rem; color: #d90429; }
 .ticket .stub-header { text-align: right; margin-bottom: 30px; }
 .ticket .pass-title-small { font-size: 1rem; color: #555; }
 .ticket .airline-small { font-size: 1.5rem; font-weight: 700; color: #0033a0; }
 .ticket .stub-details { display: flex; flex-direction: column; gap: 16px; }
 .ticket .stub-details .label { font-size: 0.8rem; }
-.ticket .stub-details .value-small { font-size: 1.1rem; font-weight: 700; }
+.ticket .stub-details .value-small { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; }
 .ticket .stub-details .value-small.seat { font-size: 1.3rem; color: #d90429; }
 .ticket .barcode { margin-top: auto; padding-top: 20px; text-align: center; }
+.ticket .barcode img { display: block; margin: 0 auto; }
 
-/* 반응형 */
-@media (max-width: 1200px) {
-    .passenger-card { flex-direction: column; align-items: stretch; }
-}
-@media (max-width: 768px) {
-    .passenger-inputs { flex-direction: column; align-items: stretch; }
+.map-icon-link svg {
+    width: 1.2em;
+    height: 1.2em;
+    vertical-align: middle;
+    margin-left: 5px;
+    cursor: pointer;
 }
 
 /* --- 티켓 뷰어 스타일 --- */
