@@ -31,16 +31,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const createTicketHTML = (ticketData, index) => {
         const { flight } = ticketData;
-        const departure = new Date(flight.departure_datetime);
-        const departureDate = `${departure.getFullYear()}.${String(departure.getMonth() + 1).padStart(2, '0')}.${String(departure.getDate()).padStart(2, '0')}`;
-        const departureTime = `${String(departure.getHours()).padStart(2, '0')}:${String(departure.getMinutes()).padStart(2, '0')}`;
+        const departure = flight.departure_datetime ? new Date(flight.departure_datetime) : null;
+        const departureDate = departure ? `${departure.getFullYear()}.${String(departure.getMonth() + 1).padStart(2, '0')}.${String(departure.getDate()).padStart(2, '0')}` : '';
+        const departureTime = departure ? `${String(departure.getHours()).padStart(2, '0')}:${String(departure.getMinutes()).padStart(2, '0')}` : '';
+        const mapLink = flight.departure_address ? `<a href="${flight.departure_address}" target="_blank" title="지도 보기">🗺️</a>` : '';
 
         return `
         <div class="ticket">
             <div class="main-content">
                 <div class="header"><div class="airline-info"><span class="airline">${flight.airline}</span><span class="pass-title">BOARDING PASS</span></div></div>
                 <div class="flight-info">
-                    <div class="airport from"><div class="airport-name">${flight.departure_city}</div><div class="airport-code">${flight.departure_airport_code || ''}</div></div>
+                    <div class="airport from"><div class="airport-name">${flight.departure_city} ${mapLink}</div><div class="airport-code">${flight.departure_airport_code || ''}</div></div>
                     <div class="plane-icon"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="#0033a0"><path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/></svg></div>
                     <div class="airport to"><div class="airport-name">${flight.arrival_city}</div><div class="airport-code">${flight.arrival_airport_code || ''}</div></div>
                 </div>

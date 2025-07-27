@@ -15,13 +15,14 @@
             <div class="form-section common-info">
                 <h2>1. 공통 여행 정보</h2>
                 <div class="grid-inputs" id="common-inputs">
-                    <input type="text" name="departure_city" placeholder="출발 도시" value="서울" required>
-                    <input type="text" name="departure_airport_code" placeholder="출발 공항 코드" value="ICN" required>
-                    <input type="text" name="arrival_city" placeholder="도착 도시" value="파리" required>
-                    <input type="text" name="arrival_airport_code" placeholder="도착 공항 코드" value="CDG" required>
-                    <input type="text" name="airline" placeholder="항공사" value="Korean Air" required>
-                    <input type="text" name="flight_number" placeholder="항공편명" value="KE901" required>
-                    <input type="datetime-local" name="departure_datetime" value="2025-08-01T14:30" required>
+                    <input type="text" name="departure_city" placeholder="출발 도시" value="인천">
+                    <input type="text" name="departure_airport_code" placeholder="출발 공항 코드" value="ICN">
+                    <input type="text" name="arrival_city" placeholder="도착 도시" value="파리">
+                    <input type="text" name="arrival_airport_code" placeholder="도착 공항 코드" value="CDG">
+                    <input type="text" name="airline" placeholder="항공사" value="Korean Air">
+                    <input type="text" name="flight_number" placeholder="출발지 주소 (예: 인천공항 T1)" value="인천공항 T1">
+                    <input type="datetime-local" name="departure_datetime" value="2025-08-01T14:30">
+                    <input type="text" name="departure_address" placeholder="지도 URL (예: https://place.map.kakao.com/10751028)" value="https://place.map.kakao.com/10751028">
                 </div>
             </div>
 
@@ -56,8 +57,8 @@
     <template id="passenger-template">
         <div class="passenger-card">
             <div class="passenger-inputs">
-                <input type="text" class="passenger-name" placeholder="이름 (예: 홍길동)" required>
-                <input type="text" class="passenger-seat" placeholder="좌석 (예: 24A)" required>
+                <input type="text" class="passenger-name" placeholder="이름 (예: 홍길동)">
+                <input type="text" class="passenger-seat" placeholder="좌석 (예: 24A)">
                 <button type="button" class="remove-btn" title="삭제">×</button>
             </div>
         </div>
